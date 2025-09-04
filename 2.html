@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자리배치 프로그램</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 32px 24px 24px 24px;
+            position: relative;
+        }
+        .board {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .desk {
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 24px;
+            color: #666;
+        }
+        .seats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 10px;
+            margin-bottom: 24px;
+        }
+        .seat {
+            background: #e9ecef;
+            border-radius: 6px;
+            padding: 18px 0;
+            text-align: center;
+            font-size: 1.1em;
+            color: #222;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: background 0.3s;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .btn {
+            padding: 10px 24px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .message {
+            text-align: center;
+            font-size: 1.1em;
+            color: #007bff;
+            min-height: 28px;
+            margin-bottom: 8px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .blinking {
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="board">🧑‍🏫 칠판</div>
+        <div class="desk">교탁</div>
+        <div class="seats" id="seats"></div>
+        <div class="controls">
+            <button class="btn" onclick="shuffleSeats()">자리바꿈</button>
+            <button class="btn" onclick="resetSeats()">리셋</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
+    <script>
+        const seatCount = 25;
+        let seats = Array.from({length: seatCount}, (_, i) => i + 1);
+        let initialSeats = [...seats];
+        let shuffleInterval = null;
+        let shuffleTimeout = null;
+
+        function renderSeats(arr) {
+            const seatsDiv = document.getElementById('seats');
+            seatsDiv.innerHTML = '';
+            arr.forEach((num, idx) => {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.textContent = num;
+                seatsDiv.appendChild(seat);
+            });
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function shuffleSeats() {
+            if (shuffleInterval || shuffleTimeout) return;
+            const msg = document.getElementById('message');
+            msg.textContent = '자리를 바꾸고 있습니다.';
+            msg.classList.add('blinking');
+            shuffleInterval = setInterval(() => {
+                shuffleArray(seats);
+                renderSeats(seats);
+            }, 200);
+            shuffleTimeout = setTimeout(() => {
+                clearInterval(shuffleInterval);
+                shuffleInterval = null;
+                shuffleTimeout = null;
+                msg.textContent = '';
+                msg.classList.remove('blinking');
+            }, 5000);
+        }
+
+        function resetSeats() {
+            if (shuffleInterval) {
+                clearInterval(shuffleInterval);
+                shuffleInterval = null;
+            }
+            if (shuffleTimeout) {
+                clearTimeout(shuffleTimeout);
+                shuffleTimeout = null;
+            }
+            seats = [...initialSeats];
+            renderSeats(seats);
+            document.getElementById('message').textContent = '';
+            document.getElementById('message').classList.remove('blinking');
+        }
+
+        // 초기 렌더링
+        renderSeats(seats);
+    </script>
+</body>
+</html>
